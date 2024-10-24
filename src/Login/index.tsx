@@ -2,6 +2,8 @@ import { useState, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import { login } from "../../services/users.ts";
+import Alert from "react-bootstrap/Alert";
+
 
 interface User {
   email: string;
@@ -10,8 +12,9 @@ interface User {
 
 export default function Login() {
   const navigate = useNavigate();
+  const [error, setError] = useState(false);
 
-  // State for user login input
+  // State for user login input 
   const [user, setUser] = useState<User>({
     email: "",
     password: "",
@@ -19,31 +22,43 @@ export default function Login() {
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-  
-    // Retrieve user data from localStorage
+
+    // Retrieve user data from localStorage 
     const user_data: User | null = JSON.parse(localStorage.getItem("user") || "null");
-  
+
     try {
-      await login(user); // Call the login function and wait for it to resolve
-  
-      // After login, check user data
+      await login(user); // Call the login function and wait for it to resolve 
+
+      // After login, check user data 
       if (
-        user_data && // Ensure user_data exists
+        user_data && // Ensure user_data exists 
         user.email === user_data.email &&
         user.password === user_data.password
       ) {
-        navigate("/"); // Navigate on successful login
-      } else {
-        console.log("Invalid email or password"); // Handle invalid credentials
+        setError(false);
+        navigate("/"); // Navigate on successful login 
+      }
+      else {
+        setError(true);
+        console.log("Invalid email or password"); // Handle invalid credentials 
       }
     } catch (error) {
-      console.error("Login error: ", error); // Catch and log any errors
+      setError(true);
+
+      console.error("Login error: ", error); // Catch and log any errors 
     }
   };
-  
+
   return (
     <>
       <div className="my-5 p-5 w-50 container mx-auto bg-white">
+        {error && (
+          <Alert variant="danger" onClose={() => setError(false)} dismissible>
+            <Alert.Heading>Error!</Alert.Heading>
+            <p>invalid email or password</p>
+          </Alert>
+        )}
+
         <h2 className="text-center mb-4">Log In</h2>
         <Form onSubmit={handleLogin}>
           <Form.Group className="mb-3" controlId="email">
