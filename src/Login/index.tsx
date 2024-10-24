@@ -1,34 +1,48 @@
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
-import { login } from "../services/users";
+import { login } from "../../services/users";
+
+interface User {
+  email: string;
+  password: string;
+}
 
 export default function Login() {
   const navigate = useNavigate();
 
-  const [user, setUser] = useState({
+  // State for user login input
+  const [user, setUser] = useState<User>({
     email: "",
     password: "",
   });
-  const user_data = JSON.parse(localStorage.getItem("user"));
-  const handleLogin = (event) => {
+
+  // Retrieve user data from localStorage
+  const user_data: User | null = JSON.parse(localStorage.getItem("user") || "null");
+
+  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    // Call the login function and handle the response
     let User = fetch(login(user));
     User.then((response) => {
       if (
         response.ok === true &&
+        user_data && // Ensure user_data exists
         user.email === user_data.email &&
         user.password === user_data.password
       ) {
         navigate("/");
       }
+    }).catch((error) => {
+      console.error("Login error: ", error);
     });
   };
+
   return (
     <>
       <div className="my-5 p-5 w-50 container mx-auto bg-white">
         <h2 className="text-center mb-4">Log In</h2>
-        {/* {error && <Alert variant="danger"></Alert>} */}
         <Form onSubmit={handleLogin}>
           <Form.Group className="mb-3" controlId="email">
             <Form.Label>Email</Form.Label>
@@ -53,18 +67,16 @@ export default function Login() {
             </Form.Control.Feedback>
           </Form.Group>
           <button
-            className="btn btn-warning w-100 my-4 text-center  mx-auto"
+            className="btn btn-warning w-100 my-4 text-center mx-auto"
             type="submit"
           >
             Log In
           </button>
-          {/* <p className="form__error">{error}</p> */}
         </Form>
         <div className="w-100 text-center mt-2">
-        Need an account? <Link to="/Signup">Sign Up</Link>
+          Need an account? <Link to="/Signup">Sign Up</Link>
+        </div>
       </div>
-      </div>
-
     </>
   );
 }

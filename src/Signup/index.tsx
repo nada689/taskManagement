@@ -4,10 +4,19 @@ import { Add_user } from "../services/users";
 import Form from "react-bootstrap/Form";
 import Alert from "react-bootstrap/Alert";
 
+// Define the type for the user object
+interface User {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
 export default function SignUp() {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState<boolean>(false);
   const toggleShow = () => setShow(!show);
-  const [user, setUser] = useState({
+  
+  const [user, setUser] = useState<User>({
     firstName: "",
     lastName: "",
     email: "",
@@ -15,11 +24,12 @@ export default function SignUp() {
   });
 
   const navigate = useNavigate();
-  const [validated, setValidated] = useState(false);
+  const [validated, setValidated] = useState<boolean>(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
+    
     if (form.checkValidity() === false) {
       event.preventDefault();
       event.stopPropagation();
@@ -28,6 +38,7 @@ export default function SignUp() {
       createUser();
     }
   };
+
   const createUser = () => {
     Add_user(user).then(() => {
       toggleShow();
@@ -93,15 +104,11 @@ export default function SignUp() {
               Please add a password.
             </Form.Control.Feedback>
           </Form.Group>
-          <div
-            className="text-center 
-          mx-auto"
-          >
+          <div className="text-center mx-auto">
             <input
               type="submit"
               value="Create user"
-              className="btn btn-warning w-100 my-4 text-center 
-             mx-auto"
+              className="btn btn-warning w-100 my-4 text-center mx-auto"
             />
           </div>
           <div className="w-100 text-center mt-2">
@@ -112,3 +119,4 @@ export default function SignUp() {
     </>
   );
 }
+
