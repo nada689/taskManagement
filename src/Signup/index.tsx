@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Add_user } from "../services/users";
+import { Add_user } from "../../services/users";
 import Form from "react-bootstrap/Form";
 import Alert from "react-bootstrap/Alert";
 

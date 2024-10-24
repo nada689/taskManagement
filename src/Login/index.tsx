@@ -1,7 +1,7 @@
 import { useState, FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Form from "react-bootstrap/Form";
-import { login } from "../../services/users";
+import { login } from "../../services/users.ts";
 
 interface User {
   email: string;
@@ -17,28 +17,30 @@ export default function Login() {
     password: "",
   });
 
-  // Retrieve user data from localStorage
-  const user_data: User | null = JSON.parse(localStorage.getItem("user") || "null");
-
-  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
-    // Call the login function and handle the response
-    let User = fetch(login(user));
-    User.then((response) => {
+  
+    // Retrieve user data from localStorage
+    const user_data: User | null = JSON.parse(localStorage.getItem("user") || "null");
+  
+    try {
+      await login(user); // Call the login function and wait for it to resolve
+  
+      // After login, check user data
       if (
-        response.ok === true &&
         user_data && // Ensure user_data exists
         user.email === user_data.email &&
         user.password === user_data.password
       ) {
-        navigate("/");
+        navigate("/"); // Navigate on successful login
+      } else {
+        console.log("Invalid email or password"); // Handle invalid credentials
       }
-    }).catch((error) => {
-      console.error("Login error: ", error);
-    });
+    } catch (error) {
+      console.error("Login error: ", error); // Catch and log any errors
+    }
   };
-
+  
   return (
     <>
       <div className="my-5 p-5 w-50 container mx-auto bg-white">

@@ -1,15 +1,29 @@
-import { db } from "../Firebase"; // Ensure the path is correct
+import { db } from "../Firebase.ts"; // Ensure the path is correct
 import { addDoc, collection, updateDoc, getDocs } from "firebase/firestore";
-var User = {
+
+// Define a type for the User
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
+// Initialize an empty user
+let currentUser: User = {
   id: "",
   firstName: "",
   lastName: "",
   email: "",
   password: "",
 };
-let users = [];
+
+// Users array
+let users: User[] = [];
+
 // Add user to Firestore
-export const Add_user = async (user) => {
+export const Add_user = async (user: Omit<User, 'id'>): Promise<void> => {
   try {
     // Add a new document with the user's data
     const docRef = await addDoc(collection(db, "Users"), {
@@ -28,39 +42,34 @@ export const Add_user = async (user) => {
 };
 
 // Login function
-export const login = async (user) => {
+export const login = async (user: Pick<User, 'email' | 'password'>): Promise<void> => {
   try {
     // Retrieve documents from Firestore collection
     const querySnapshot = await getDocs(collection(db, "Users"));
+    
     // Loop through documents and filter by userType
     querySnapshot.forEach((doc) => {
-      if (
-        doc.data().email === user.email &&
-        doc.data().password === user.password
-      ) {
-        User = {
+      const userData = doc.data() as Omit<User, 'id'>; // Cast doc.data() to User without id
+      if (userData.email === user.email && userData.password === user.password) {
+        currentUser = {
           id: doc.id,
-          firstName: doc.data().firstName,
-          lastName: doc.data().lastName,
-          email: doc.data().email,
-          password: doc.data().password,
+          ...userData,
         };
-        users.push(User); // Add admin users to array
+        users.push(currentUser); // Add logged-in user to array
+        // Store user data in localStorage
+        localStorage.setItem("user", JSON.stringify(currentUser));
       } else {
         console.log("Invalid email or password");
       }
     });
-
-    // Store user data in localStorage
-    localStorage.setItem("user", JSON.stringify(user));
   } catch (error) {
-    console.error("Error adding document: ", error);
+    console.error("Error reading document: ", error);
   }
 };
 
 // Logout function
-export const logout = () => {
-  User = {
+export const logout = (): void => {
+  currentUser = {
     id: "",
     firstName: "",
     lastName: "",
